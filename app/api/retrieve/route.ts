@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const { data: clip, error } = await supabase
     .from('clips')
     .select('*')
-    .eq('code', code)
+    .ilike('code', code)   // ← changed from .eq to .ilike (case-insensitive)
     .single()
 
   if (error || !clip) {
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   await supabase
     .from('clips')
     .update({ view_count: clip.view_count + 1 })
-    .eq('code', code)
+    .eq('code', clip.code)
 
   return Response.json({ clip })
 }

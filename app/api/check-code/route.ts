@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const { data } = await supabase
     .from('clips')
     .select('code')
-    .eq('code', code)
+    .ilike('code', code)
     .single()
 
   return Response.json({ available: !data })
