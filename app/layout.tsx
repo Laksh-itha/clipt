@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CLIPT — Drop. Code. Access.",
   description: "Share images, text and files anywhere with a unique code.",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
