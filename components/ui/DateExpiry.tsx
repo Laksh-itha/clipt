@@ -13,13 +13,14 @@ export default function DateExpiry({ code, status, expiry, setExpiry, onSubmit, 
   const isValidCode = code.length >= 4 && status === "available";
 
   return (
-    <div className="space-y-4">
-      <div className="p-4 border border-[#e5d9ce] bg-white/50 dark:bg-[#0f0f1a] rounded-lg w-150">
-        <p className="text-md font-semibold tracking-widest uppercase text-[#7a6a5e] dark:text-[#888888] mb-2">
-          EXPIRES AFTER
+    <div className="w-full space-y-4">
+
+      <div className="w-full p-4 border border-[#e5d9ce] dark:border-[#1c1c2e] bg-white/50 dark:bg-[#0f0f1a] rounded-lg">
+        <p className="text-sm font-semibold tracking-widest uppercase text-[#7a6a5e] dark:text-[#888888] mb-2">
+          Expires After
         </p>
         <select
-          className="text-md px-2 font-semibold tracking-widest uppercase text-[#b0a090] dark:text-[#888888] bg-transparent dark:bg-[#0f0f1a] w-full rounded-lg h-8 border border-[#e5d9ce] dark:border-[#1c1c2e] cursor-pointer"
+          className="text-sm px-2 font-semibold tracking-widest uppercase text-[#b0a090] dark:text-[#888888] bg-transparent dark:bg-[#0f0f1a] w-full rounded-lg h-9 border border-[#e5d9ce] dark:border-[#1c1c2e] cursor-pointer"
           value={expiry}
           onChange={(e) => setExpiry(e.target.value)}
         >
@@ -34,7 +35,7 @@ export default function DateExpiry({ code, status, expiry, setExpiry, onSubmit, 
         <button
           onClick={onSubmit}
           disabled={!isValidCode || loading}
-          className={`mt-2 w-150 p-3 text-md font-semibold tracking-widest uppercase rounded-lg transition ${
+          className={`mt-2 w-full p-3 text-sm font-semibold tracking-widest uppercase rounded-lg transition ${
             isValidCode && !loading
               ? "bg-green-100 dark:bg-green-900/30 text-[#7a6a5e] dark:text-[#c8f542] cursor-pointer hover:bg-green-200"
               : "bg-[#f5eee6] dark:bg-[#13131e] text-[#b0a090] dark:text-[#888888] cursor-not-allowed"

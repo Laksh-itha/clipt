@@ -51,22 +51,36 @@ export default function Home() {
   };
 
   return (
-    <main className="p-10 flex flex-col items-center bg-[#faf6f1] dark:bg-[#09090f]">
-      <ClipViewer
-        mode={mode}
-        setMode={setMode}
-        file={file}
-        setFile={setFile}
-        preview={preview}
-        setPreview={setPreview}
-        textContent={textContent}
-        setTextContent={setTextContent}
-      />
-      <br />
-      <CodeInput code={code} setCode={setCode} status={status} setStatus={setStatus} />
-      <br />
-      <DateExpiry code={code} status={status} expiry={expiry} setExpiry={setExpiry} onSubmit={handleSubmit} loading={loading} />
-      {error && <p className="text-red-400 text-xs font-semibold mt-3 tracking-wide">✗ {error}</p>}
+    <main className="px-4 py-8 sm:px-8 sm:py-10 flex flex-col items-center bg-[#faf6f1] dark:bg-[#09090f]">
+      <div className="w-full max-w-2xl flex flex-col gap-4">
+        <ClipViewer
+          mode={mode}
+          setMode={setMode}
+          file={file}
+          setFile={setFile}
+          preview={preview}
+          setPreview={setPreview}
+          textContent={textContent}
+          setTextContent={setTextContent}
+        />
+        <CodeInput
+          code={code}
+          setCode={setCode}
+          status={status}
+          setStatus={setStatus}
+        />
+        <DateExpiry
+          code={code}
+          status={status}
+          expiry={expiry}
+          setExpiry={setExpiry}
+          onSubmit={handleSubmit}
+          loading={loading}
+        />
+        {error && (
+          <p className="text-red-400 text-xs font-semibold tracking-wide">✗ {error}</p>
+        )}
+      </div>
     </main>
   );
 }

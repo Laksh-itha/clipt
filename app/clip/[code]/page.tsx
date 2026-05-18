@@ -8,7 +8,6 @@ interface Clip {
   content?: string;
   language?: string;
   label?: string;
-  // view_count: number;
   expires_at?: string;
   code: string;
 }
@@ -43,6 +42,24 @@ export default function ClipPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownload = async () => {
+    if (!clip?.file_url) return;
+    try {
+      const response = await fetch(clip.file_url);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `clipt-${String(code)}.${clip.type === "pdf" ? "pdf" : "png"}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Download failed. Try again.");
+    }
+  };
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
@@ -74,14 +91,11 @@ export default function ClipPage() {
                 {clip.label}
               </p>
             )}
-            <p className="text-xl font-black tracking-widest uppercase text-[#3a3028]">
+            <p className="text-xl font-black tracking-widest uppercase text-[#3a3028] dark:text-[#e8e8f4]">
               {String(code)}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {/* <span className="text-xs text-[#b0a090] tracking-wide">
-              👁 {clip.view_count} views
-            </span> */}
             {clip.expires_at && (
               <span className="text-xs text-[#b0a090] tracking-wide">
                 ⏱ Expires {new Date(clip.expires_at).toLocaleDateString()}
@@ -90,7 +104,7 @@ export default function ClipPage() {
           </div>
         </div>
 
-        <div className="border border-[#e5d9ce] rounded-xl overflow-hidden bg-white/50">
+        <div className="border border-[#e5d9ce] rounded-xl overflow-hidden bg-white/50 dark:bg-[#0f0f1a]">
           {clip.type === "image" && clip.file_url && (
             <img
               src={clip.file_url}
@@ -99,20 +113,24 @@ export default function ClipPage() {
             />
           )}
           {clip.type === "pdf" && clip.file_url && (
-            <iframe
-              src={clip.file_url}
-              className="w-full h-150"
-              title="PDF"
-            />
+            <div className="w-full p-8 flex flex-col items-center gap-4">
+              <div className="text-6xl">📄</div>
+              <p className="text-sm font-semibold text-[#3a3028] dark:text-[#e8e8f4] text-center">
+                PDF Document
+              </p>
+              <p className="text-xs text-[#b0a090]">
+                Click download to save this PDF
+              </p>
+            </div>
           )}
           {clip.type === "text" && (
-            <div className="p-6 whitespace-pre-wrap text-[#3a3028] text-sm leading-relaxed font-mono">
+            <div className="p-6 whitespace-pre-wrap text-[#3a3028] dark:text-[#e8e8f4] text-sm leading-relaxed font-mono">
               {clip.content}
             </div>
           )}
           {clip.type === "code" && (
             <pre className="p-6 overflow-x-auto text-sm">
-              <code className="text-green-700">{clip.content}</code>
+              <code className="text-green-700 dark:text-green-400">{clip.content}</code>
             </pre>
           )}
         </div>
@@ -120,18 +138,17 @@ export default function ClipPage() {
         <div className="flex gap-3">
           <button
             onClick={copyContent}
-            className="flex-1 h-11 border border-[#e5d9ce] rounded-xl text-xs font-bold tracking-widest uppercase text-[#7a6a5e] hover:bg-[#f0ebe4] transition-colors"
+            className="flex-1 h-11 border border-[#e5d9ce] dark:border-[#1c1c2e] rounded-xl text-xs font-bold tracking-widest uppercase text-[#7a6a5e] dark:text-[#888888] hover:bg-[#f0ebe4] dark:hover:bg-[#13131e] transition-colors"
           >
             {copied ? "✓ Copied!" : "📋 Copy"}
           </button>
           {(clip.type === "image" || clip.type === "pdf") && clip.file_url && (
-            <a
-              href={clip.file_url}
-              download
-              className="flex-1 h-11 border border-[#e5d9ce] rounded-xl text-xs font-bold tracking-widest uppercase text-[#7a6a5e] hover:bg-[#f0ebe4] transition-colors flex items-center justify-center"
+            <button
+              onClick={handleDownload}
+              className="flex-1 h-11 border border-[#e5d9ce] dark:border-[#1c1c2e] rounded-xl text-xs font-bold tracking-widest uppercase text-[#7a6a5e] dark:text-[#888888] hover:bg-[#f0ebe4] dark:hover:bg-[#13131e] transition-colors flex items-center justify-center"
             >
               ⬇ Download
-            </a>
+            </button>
           )}
         </div>
       </div>

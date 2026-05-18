@@ -8,79 +8,79 @@ interface Props {
 
 export default function UploadZone({ onFile }: Props) {
   const [preview, setPreview] = useState("");
-  const [textContent, setTextContent] = useState("");
   const [fileType, setFileType] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [sizeError, setSizeError] = useState("");
 
   useEffect(() => {
     return () => {
-      if (preview) {
-        URL.revokeObjectURL(preview);
-      }
+      if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
-    console.log("File received:", file.name, file.type);
     setSizeError("");
-    setFiles(acceptedFiles);
+    setUploadedFile(file);
+    onFile(file);
+
     if (file.type.startsWith("image/")) {
       setFileType("image");
       setPreview(URL.createObjectURL(file));
     } else if (file.type === "application/pdf") {
       setFileType("pdf");
-      setPreview(URL.createObjectURL(file));
+      setPreview("");
     } else if (file.type.startsWith("text/")) {
       setFileType("text");
-      const reader = new FileReader();
-      reader.onload = (e) => setTextContent(e.target?.result as string);
-      reader.readAsText(file);
+      setPreview("");
     }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setFiles([]);
+    setUploadedFile(null);
     setPreview("");
-    setTextContent("");
     setFileType("");
     setSizeError("");
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    onDropRejected: (rejectedFiles) => {
-      const error = rejectedFiles[0]?.errors[0];
-      if (error?.code === "file-too-large") {
-        setSizeError("File too large — max 20MB");
-      } else {
-        setSizeError("File type not supported");
-      }
-      setTimeout(() => setSizeError(""), 3000);
-    },
+    useFsAccessApi: false,
     accept: {
-      "image/*": [],
-      "application/pdf": [],
-      "text/*": [],
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+      "application/pdf": [".pdf"],
+      "text/*": [".txt", ".csv", ".md"],
     },
     multiple: false,
     maxSize: 20 * 1024 * 1024,
+    onDropRejected: (rejectedFiles) => {
+      const error = rejectedFiles[0]?.errors[0];
+      setSizeError(
+        error?.code === "file-too-large"
+          ? "File too large — max 20MB"
+          : "File type not supported"
+      );
+      setTimeout(() => setSizeError(""), 3000);
+    },
   });
 
   return (
-    <div >
+    <div className="w-full">
       <div
         {...getRootProps()}
-        className={`p-4 w-150 border border-[#e5d9ce] bg-white/50 dark:bg-[#0f0f1a] rounded-lg  cursor-pointer text-xs h-70 font-semibold tracking-widest uppercase text-gray-400 transition-colors ${
-          isDragActive ? "border-green-500 bg-green-50" : "border border-[#e5d9ce]"
+        className={`w-full border bg-white/50 dark:bg-[#0f0f1a] rounded-lg cursor-pointer text-xs font-semibold tracking-widest uppercase text-gray-400 transition-colors h-64 sm:h-70 ${
+          isDragActive
+            ? "border-green-500 bg-green-50"
+            : "border-[#e5d9ce] dark:border-[#1c1c2e]"
         }`}
       >
         <input {...getInputProps()} />
-        {files.length > 0 ? (
+
+        {uploadedFile ? (
           <div className="relative w-full h-full">
+
             {fileType === "image" && preview && (
               <img
                 src={preview}
@@ -89,25 +89,39 @@ export default function UploadZone({ onFile }: Props) {
               />
             )}
 
-            {fileType === "pdf" && preview && (
-              <iframe
-                src={preview}
-                className="w-full h-full rounded-xl"
-                title="PDF Preview"
-              />
+            {fileType === "pdf" && (
+              <div className="w-full h-full flex flex-col items-center justify-center rounded-xl bg-gray-50 dark:bg-[#13131e] gap-3">
+                <div className="text-6xl">📄</div>
+                <p className="text-sm font-semibold text-[#3a3028] dark:text-[#e8e8f4] normal-case tracking-normal px-4 text-center">
+                  {uploadedFile.name}
+                </p>
+                <p className="text-xs text-[#b0a090] dark:text-[#888888] normal-case tracking-normal">
+                  {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+                <span className="px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 text-xs font-semibold tracking-wide uppercase">
+                  PDF
+                </span>
+              </div>
             )}
 
             {fileType === "text" && (
-              <div className="w-full h-full overflow-auto rounded-xl bg-gray-50 p-3">
-                <pre className="text-xs text-gray-700 font-mono normal-case whitespace-pre-wrap wrap-break-word">
-                  {textContent}
-                </pre>
+              <div className="w-full h-full flex flex-col items-center justify-center rounded-xl bg-gray-50 dark:bg-[#13131e] gap-3">
+                <div className="text-6xl">📝</div>
+                <p className="text-sm font-semibold text-[#3a3028] dark:text-[#e8e8f4] normal-case tracking-normal px-4 text-center">
+                  {uploadedFile.name}
+                </p>
+                <p className="text-xs text-[#b0a090] dark:text-[#888888] normal-case tracking-normal">
+                  {(uploadedFile.size / 1024).toFixed(1)} KB
+                </p>
+                <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-500 text-xs font-semibold tracking-wide uppercase">
+                  Text File
+                </span>
               </div>
             )}
 
             <button
               type="button"
-              className="absolute top-3 right-3 bg-green-200 px-3 py-1 rounded-md text-xs font-medium text-gray-700 shadow opacity-100"
+              className="absolute top-3 right-3 bg-green-200 px-3 py-1 rounded-md text-xs font-medium text-gray-700 shadow"
             >
               Click to change
             </button>
@@ -120,17 +134,23 @@ export default function UploadZone({ onFile }: Props) {
             </button>
           </div>
         ) : (
-          <div className="text-center">
-            <div className="text-4xl mb-4 mt-12">🖼️</div>
-            <p className="text-lg text-[#7a6a5e]">Drag & drop your image here</p>
-            <p className="text-sm text-[#b0a090]">or click to browse files</p>
-            <p className="text-xs mt-2 text-[#b0a090]">PNG · JPG · GIF · WEBP · PDF — up to 20MB</p>
+          <div className="text-center flex flex-col items-center justify-center h-full px-4">
+            <div className="text-4xl mb-4">🖼️</div>
+            <p className="text-sm sm:text-lg text-[#7a6a5e] dark:text-[#888888]">
+              Drag & drop your file here
+            </p>
+            <p className="text-xs sm:text-sm text-[#b0a090] dark:text-[#888888]">
+              or click to browse files
+            </p>
+            <p className="text-xs mt-2 text-[#b0a090] dark:text-[#888888]">
+              PNG · JPG · GIF · WEBP · PDF — up to 20MB
+            </p>
           </div>
         )}
       </div>
 
       {sizeError && (
-        <p className="text-[#7a6a5e] text-xs mt-2 text-center">{sizeError}</p>
+        <p className="text-red-400 text-xs mt-2 text-center">{sizeError}</p>
       )}
     </div>
   );
